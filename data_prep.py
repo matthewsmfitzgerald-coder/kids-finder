@@ -21,6 +21,7 @@ plus some data cleaning.
 
 import json
 import sys
+import time
 from pathlib import Path
 
 import requests
@@ -40,6 +41,16 @@ CHILD_MAX_AGE_YEARS = 18  # keep programs whose minimum age is under this
 
 # Where the app expects the data to live.
 OUTPUT_PATH = Path(__file__).parent / "public" / "programs.json"
+
+# Geocoding (turning addresses into map coordinates).
+# We use Nominatim, OpenStreetMap's free geocoder -- no API key required, but its
+# usage policy asks for a descriptive User-Agent and at most 1 request/second.
+NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
+GEOCODE_USER_AGENT = "toronto-kids-finder/1.0 (educational project)"
+GEOCODE_DELAY_SECONDS = 1.0
+# Results are cached here so re-runs are instant and reproducible. This file is
+# committed to the repo on purpose -- it's our coordinate lookup table.
+GEOCODE_CACHE_PATH = Path(__file__).parent / "geocode_cache.json"
 
 
 # --- Small helpers -----------------------------------------------------------
@@ -111,6 +122,84 @@ def build_address(loc):
         clean(loc.get("Street Direction")),
     ]
     return " ".join(p for p in parts if p) or None
+
+
+# --- Geocoding ---------------------------------------------------------------
+
+def load_geocode_cache():
+    """Read the saved coordinate lookups, or start empty if there's no file yet."""
+    if GEOCODE_CACHE_PATH.exists():
+        return json.loads(GEOCODE_CACHE_PATH.read_text(encoding="utf-8"))
+    return {}
+
+
+def save_geocode_cache(cache):
+    """Persist the cache after each lookup so a crash never loses progress."""
+    GEOCODE_CACHE_PATH.write_text(
+        json.dumps(cache, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+
+
+def geocode_one(query):
+    """Ask Nominatim for the coordinates of one address string.
+
+    Returns {"lat": float, "lng": float} on success, or None if no match.
+    """
+    response = requests.get(
+        NOMINATIM_URL,
+        params={"q": query, "format": "json", "limit": 1, "countrycodes": "ca"},
+        headers={"User-Agent": GEOCODE_USER_AGENT},
+        timeout=30,
+    )
+    response.raise_for_status()
+    results = response.json()
+    if not results:
+        return None
+    return {"lat": float(results[0]["lat"]), "lng": float(results[0]["lon"])}
+
+
+def attach_coordinates(programs):
+    """Add lat/lng to each program by geocoding its (unique) location.
+
+    Many programs share a location, so we geocode each distinct location once,
+    cache the result, and copy the coordinates onto every program there.
+    """
+    # Build "location name -> best address query" for each distinct location.
+    queries = {}
+    for p in programs:
+        name = p["location_name"]
+        if not name or name in queries:
+            continue
+        address = p["address"]
+        postal = p["postal_code"]
+        if postal:
+            queries[name] = f"{address}, Toronto, ON {postal}, Canada"
+        else:
+            queries[name] = f"{address}, Toronto, ON, Canada"
+
+    cache = load_geocode_cache()
+    pending = [(name, q) for name, q in queries.items() if name not in cache]
+    print(
+        f"Geocoding {len(pending)} new locations "
+        f"({len(queries) - len(pending)} already cached)..."
+    )
+
+    for i, (name, query) in enumerate(pending, start=1):
+        try:
+            cache[name] = geocode_one(query)
+        except requests.RequestException as err:
+            print(f"  [{i}/{len(pending)}] {name}: ERROR {err}")
+            cache[name] = None
+        else:
+            print(f"  [{i}/{len(pending)}] {name} -> {cache[name]}")
+        save_geocode_cache(cache)            # save progress incrementally
+        time.sleep(GEOCODE_DELAY_SECONDS)    # be polite to the free service
+
+    # Copy coordinates onto every program (None if the location couldn't be found).
+    for p in programs:
+        coords = cache.get(p["location_name"])
+        p["lat"] = coords["lat"] if coords else None
+        p["lng"] = coords["lng"] if coords else None
 
 
 # --- Data fetching -----------------------------------------------------------
@@ -195,15 +284,21 @@ def main():
             "status": clean(p.get("Status / Information")),
         })
 
+    # Turn each location's address into map coordinates (lat/lng).
+    print("Adding map coordinates...")
+    attach_coordinates(output)
+
     # Ensure public/ exists, then write the file (compact but valid JSON).
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with OUTPUT_PATH.open("w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False)
 
+    with_coords = sum(1 for p in output if p["lat"] is not None)
     print()
     print(f"Kept {len(output)} child-relevant programs.")
     print(f"  Skipped {skipped_no_age} with no readable Min Age.")
     print(f"  Skipped {skipped_not_child} whose min age was {CHILD_MAX_AGE_YEARS}+.")
+    print(f"  {with_coords} of {len(output)} programs have map coordinates.")
     size_kb = OUTPUT_PATH.stat().st_size / 1024
     print(f"Wrote {OUTPUT_PATH} ({size_kb:.0f} KB)")
 

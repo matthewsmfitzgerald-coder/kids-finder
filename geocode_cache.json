@@ -1,0 +1,1035 @@
+{
+  "Broadlands Community Recreation Centre": {
+    "lat": 43.745918,
+    "lng": -79.3227655
+  },
+  "Eglinton Flats": {
+    "lat": 43.68595,
+    "lng": -79.50575
+  },
+  "Adam Beck Community Centre": {
+    "lat": 43.68285,
+    "lng": -79.28885
+  },
+  "Annette Community Recreation Centre": {
+    "lat": 43.6612108,
+    "lng": -79.4740297
+  },
+  "Beaches Recreation Centre": {
+    "lat": 43.674044,
+    "lng": -79.2985961
+  },
+  "Bedford Park Community Centre": {
+    "lat": 43.727503,
+    "lng": -79.4000615
+  },
+  "Bob Abate Community Recreation Centre": {
+    "lat": 43.6624,
+    "lng": -79.42033
+  },
+  "Earl Beatty Community Centre": {
+    "lat": 43.6863578,
+    "lng": -79.3209013
+  },
+  "Frankland Community Centre": {
+    "lat": 43.6770128,
+    "lng": -79.3506814
+  },
+  "Antibes Community Centre": {
+    "lat": 43.781186,
+    "lng": -79.4469944
+  },
+  "Hillcrest Community Centre": {
+    "lat": 43.67922,
+    "lng": -79.41637
+  },
+  "Holy Family Community Centre": {
+    "lat": 43.6385252,
+    "lng": -79.4346758
+  },
+  "Jimmie Simpson Recreation Centre": {
+    "lat": 43.660407,
+    "lng": -79.345308
+  },
+  "John Innes Community Recreation Centre": {
+    "lat": 43.6554585,
+    "lng": -79.3703783
+  },
+  "Greenwood Park": {
+    "lat": 43.6645865,
+    "lng": -79.3253725
+  },
+  "Keele Community Centre": {
+    "lat": 43.65781,
+    "lng": -79.46185
+  },
+  "Main Square Community Recreation Centre": null,
+  "Dufferin Grove Park": {
+    "lat": 43.65704,
+    "lng": -79.4336
+  },
+  "Masaryk-Cowan Community Recreation Centre": {
+    "lat": 43.6407259,
+    "lng": -79.4332738
+  },
+  "Maurice Cody Community Centre": {
+    "lat": 43.7052554,
+    "lng": -79.378401
+  },
+  "Mary McCormick Recreation Centre": {
+    "lat": 43.6474621,
+    "lng": -79.4331627
+  },
+  "Kew Gardens": {
+    "lat": 43.66999,
+    "lng": -79.29929
+  },
+  "Fairmount Park": {
+    "lat": 43.6769417,
+    "lng": -79.3156577
+  },
+  "Monarch Park": {
+    "lat": 43.6773451,
+    "lng": -79.3256556
+  },
+  "Jimmie Simpson Park": {
+    "lat": 43.660407,
+    "lng": -79.345308
+  },
+  "Earl Bales Community Centre": {
+    "lat": 43.7534966,
+    "lng": -79.4378081
+  },
+  "North Toronto Memorial Community Centre": {
+    "lat": 43.7059141,
+    "lng": -79.4051212
+  },
+  "Coleman Park": {
+    "lat": 43.6893593,
+    "lng": -79.3007566
+  },
+  "Matty Eckler Recreation Centre": {
+    "lat": 43.6678944,
+    "lng": -79.3397856
+  },
+  "Trinity Bellwoods Park": {
+    "lat": 43.64547,
+    "lng": -79.41388
+  },
+  "Parkdale Community Recreation Centre": {
+    "lat": 43.6436414,
+    "lng": -79.4373612
+  },
+  "S.H. Armstrong Community Recreation Centre": {
+    "lat": 43.6656971,
+    "lng": -79.3215766
+  },
+  "St. Lawrence Community Recreation Centre": {
+    "lat": 43.6496513,
+    "lng": -79.3652302
+  },
+  "Topham Park": {
+    "lat": 43.7104867,
+    "lng": -79.3073976
+  },
+  "Swansea Community Recreation Centre": {
+    "lat": 43.6441232,
+    "lng": -79.4768848
+  },
+  "Trinity Community Recreation Centre": {
+    "lat": 43.6462454,
+    "lng": -79.4149006
+  },
+  "Birkdale Community Centre": {
+    "lat": 43.7692038,
+    "lng": -79.2642882
+  },
+  "Wallace Emerson Community Recreation Centre": {
+    "lat": 43.6674695,
+    "lng": -79.439134
+  },
+  "Stan Wadlow Clubhouse": {
+    "lat": 43.6982057,
+    "lng": -79.3151418
+  },
+  "Withrow Park and Clubhouse": {
+    "lat": 43.67584,
+    "lng": -79.34801
+  },
+  "Fairmount Park Community Centre": {
+    "lat": 43.6766474,
+    "lng": -79.3151891
+  },
+  "Secord Community Centre": {
+    "lat": 43.6910847,
+    "lng": -79.301497
+  },
+  "Dieppe Park": {
+    "lat": 43.6923835,
+    "lng": -79.3355751
+  },
+  "East York Community Recreation Centre": {
+    "lat": 43.6917947,
+    "lng": -79.3492585
+  },
+  "East York Memorial Arena": {
+    "lat": 43.6975039,
+    "lng": -79.3153159
+  },
+  "Terry Fox Community Centre": {
+    "lat": 43.6875978,
+    "lng": -79.3098837
+  },
+  "Earl Bales Park": {
+    "lat": 43.7534966,
+    "lng": -79.4378081
+  },
+  "Riverdale Park East": {
+    "lat": 43.67146,
+    "lng": -79.35516
+  },
+  "Riverdale Farm": {
+    "lat": 43.66732,
+    "lng": -79.36105
+  },
+  "Earl Bales Park Senior Centre": {
+    "lat": 43.7534966,
+    "lng": -79.4378081
+  },
+  "Sorauren Avenue Park": {
+    "lat": 43.64876,
+    "lng": -79.44408
+  },
+  "Carmine Stefano Community Centre": {
+    "lat": 43.7337601,
+    "lng": -79.5384084
+  },
+  "Thistletown Multi-Service Centre": {
+    "lat": 43.7354505,
+    "lng": -79.5625274
+  },
+  "Humber Community Pool": {
+    "lat": 43.7307942,
+    "lng": -79.6084939
+  },
+  "MacGregor Playground": {
+    "lat": 43.6407987,
+    "lng": -79.4367285
+  },
+  "Milliken Park Community Recreation Centre": {
+    "lat": 43.8288558,
+    "lng": -79.2750531
+  },
+  "Regent Park Athletic Grounds": {
+    "lat": 43.6583827,
+    "lng": -79.3596284
+  },
+  "Edgehill House": {
+    "lat": 43.67069,
+    "lng": -79.5167
+  },
+  "Sunnyside Gus Ryder Outdoor Pool": {
+    "lat": 43.637659,
+    "lng": -79.4545301
+  },
+  "Edenbridge Centre": {
+    "lat": 43.6774551,
+    "lng": -79.5108446
+  },
+  "Donald D. Summerville Olympic Pools": {
+    "lat": 43.66506,
+    "lng": -79.30467
+  },
+  "Wellesley Community Centre": {
+    "lat": 43.6676916,
+    "lng": -79.3745264
+  },
+  "Maple Leaf Cottage": {
+    "lat": 43.6632491,
+    "lng": -79.3273586
+  },
+  "Amesbury Community Centre": {
+    "lat": 43.7073942,
+    "lng": -79.4824294
+  },
+  "Phil White Arena": {
+    "lat": 43.69128,
+    "lng": -79.4314445
+  },
+  "Fairbank Memorial Community Centre": {
+    "lat": 43.6914188,
+    "lng": -79.4480146
+  },
+  "Amesbury Park": {
+    "lat": 43.7056969,
+    "lng": -79.4871867
+  },
+  "Chalkfarm Community Recreation Centre": {
+    "lat": 43.7242495,
+    "lng": -79.5122047
+  },
+  "Ancaster Community Centre": {
+    "lat": 43.7325445,
+    "lng": -79.4656812
+  },
+  "Cummer Park Community Centre": {
+    "lat": 43.8010773,
+    "lng": -79.370839
+  },
+  "McGregor Park Community Centre": {
+    "lat": 43.7483669,
+    "lng": -79.2799228
+  },
+  "Birchmount Community Centre": {
+    "lat": 43.69542,
+    "lng": -79.26233
+  },
+  "Weston Lions Park": {
+    "lat": 43.6985856,
+    "lng": -79.5181217
+  },
+  "Joseph J. Piccininni Community Recreation Centre": {
+    "lat": 43.6753158,
+    "lng": -79.4515427
+  },
+  "Banbury Community Centre": {
+    "lat": 43.7428477,
+    "lng": -79.3687358
+  },
+  "Earlscourt Park": {
+    "lat": 43.6719926,
+    "lng": -79.4492153
+  },
+  "Agincourt Community Recreation Centre": {
+    "lat": 43.7884885,
+    "lng": -79.276042
+  },
+  "Berner Trail Community Centre": {
+    "lat": 43.8013204,
+    "lng": -79.221788
+  },
+  "Centennial Recreation Centre - Scarborough": {
+    "lat": 43.7755592,
+    "lng": -79.2351695
+  },
+  "Leaside Gardens Indoor Pool": {
+    "lat": 43.701761,
+    "lng": -79.3608884
+  },
+  "Commander Recreation Centre": {
+    "lat": 43.7948019,
+    "lng": -79.268554
+  },
+  "Douglas Snow Aquatic Centre": {
+    "lat": 43.7672407,
+    "lng": -79.4146694
+  },
+  "Driftwood Community Recreation Centre": {
+    "lat": 43.7654273,
+    "lng": -79.5187635
+  },
+  "Angela James Arena & Tennis Courts": {
+    "lat": 43.7131471,
+    "lng": -79.3275839
+  },
+  "Flemingdon Community Centre & Playground Paradise": {
+    "lat": 43.7135548,
+    "lng": -79.3263608
+  },
+  "West Rouge Community Centre": {
+    "lat": 43.7921135,
+    "lng": -79.1251455
+  },
+  "Burrows Hall Community Centre": {
+    "lat": 43.793965,
+    "lng": -79.2342778
+  },
+  "Cedarbrook Community Centre": {
+    "lat": 43.7554847,
+    "lng": -79.2242291
+  },
+  "Ellesmere Community Recreation Centre": {
+    "lat": 43.76077,
+    "lng": -79.29906
+  },
+  "Tall Pines Community Centre": {
+    "lat": 43.7981507,
+    "lng": -79.1504049
+  },
+  "Heron Park Community Recreation Centre": {
+    "lat": 43.7687341,
+    "lng": -79.1772779
+  },
+  "Glen Long Community Centre": {
+    "lat": 43.7087606,
+    "lng": -79.4559302
+  },
+  "Glen Long Park": {
+    "lat": 43.7088107,
+    "lng": -79.4559732
+  },
+  "Gord and Irene Risk Community Recreation Centre": {
+    "lat": 43.7473081,
+    "lng": -79.5659346
+  },
+  "Goulding Community Recreation Centre": {
+    "lat": 43.790698,
+    "lng": -79.4220765
+  },
+  "Grandravine Community Recreation Centre": {
+    "lat": 43.7517796,
+    "lng": -79.4896362
+  },
+  "Grandravine Park": {
+    "lat": 43.7517796,
+    "lng": -79.4896362
+  },
+  "Irving W. Chapley Community Centre": {
+    "lat": 43.7615445,
+    "lng": -79.4558676
+  },
+  "Irving W. Chapley Park": {
+    "lat": 43.7615445,
+    "lng": -79.4558676
+  },
+  "John Booth Memorial Arena": {
+    "lat": 43.7697531,
+    "lng": -79.5240659
+  },
+  "Lawrence Heights Community Centre": {
+    "lat": 43.7180395,
+    "lng": -79.4422426
+  },
+  "Mitchell Field Community Centre": {
+    "lat": 43.7745517,
+    "lng": -79.4083456
+  },
+  "L'Amoreaux Tennis Centre": {
+    "lat": 43.8077702,
+    "lng": -79.3054884
+  },
+  "Malvern Recreation Centre": {
+    "lat": 43.8085674,
+    "lng": -79.2161218
+  },
+  "Northwood Community Centre": {
+    "lat": 43.7455774,
+    "lng": -79.5001617
+  },
+  "Trace Manes Park Community Centre": {
+    "lat": 43.7046944,
+    "lng": -79.366815
+  },
+  "Don Montgomery Community Recreation Centre": {
+    "lat": 43.7326575,
+    "lng": -79.261697
+  },
+  "Oriole Community Recreation Centre": null,
+  "Parkway Forest Park": {
+    "lat": 43.7713113,
+    "lng": -79.3407922
+  },
+  "Pelmo Park Community Centre": {
+    "lat": 43.7145594,
+    "lng": -79.520162
+  },
+  "Oakridge Community Recreation Centre": null,
+  "Pleasantview Community Centre": {
+    "lat": 43.786958,
+    "lng": -79.3369757
+  },
+  "Prairie Drive Park": {
+    "lat": 43.6963257,
+    "lng": -79.2849094
+  },
+  "Scarborough Village Recreation Centre": {
+    "lat": 43.740158,
+    "lng": -79.2167185
+  },
+  "Roding Community Centre": {
+    "lat": 43.72909,
+    "lng": -79.4925
+  },
+  "Scarborough Village Park": {
+    "lat": 43.74737,
+    "lng": -79.21299
+  },
+  "North Kipling Community Centre": {
+    "lat": 43.752617,
+    "lng": -79.5847285
+  },
+  "Elmbank Community Centre": {
+    "lat": 43.7347935,
+    "lng": -79.5886818
+  },
+  "Seneca Village Community Centre": {
+    "lat": 43.7940015,
+    "lng": -79.351309
+  },
+  "Humberwood Community Centre": {
+    "lat": 43.7304616,
+    "lng": -79.619532
+  },
+  "Domenico DiLuca Community Recreation Centre": {
+    "lat": 43.742818,
+    "lng": -79.5148765
+  },
+  "Halbert Park": {
+    "lat": 43.7293976,
+    "lng": -79.2298537
+  },
+  "Victoria Village Recreation Centre and Arena": {
+    "lat": 43.7228509,
+    "lng": -79.3154875
+  },
+  "Wedgewood Park - Etobicoke": {
+    "lat": 43.6456477,
+    "lng": -79.5468774
+  },
+  "Oakdale Community Centre": {
+    "lat": 43.7472636,
+    "lng": -79.5149224
+  },
+  "Curran Hall Community Centre": {
+    "lat": 43.7774536,
+    "lng": -79.2108076
+  },
+  "L'Amoreaux Community Recreation Centre": {
+    "lat": 43.8120209,
+    "lng": -79.3049772
+  },
+  "Ourland Community Centre": {
+    "lat": 43.6177428,
+    "lng": -79.5087991
+  },
+  "The Elms Community School and Pool": {
+    "lat": 43.7217699,
+    "lng": -79.5521733
+  },
+  "Norseman Community School and Pool": {
+    "lat": 43.6341938,
+    "lng": -79.5162384
+  },
+  "Centennial Park - Etobicoke": {
+    "lat": 43.6574808,
+    "lng": -79.5869054
+  },
+  "Fairfield Seniors' Centre": {
+    "lat": 43.639515,
+    "lng": -79.5192509
+  },
+  "Horner Avenue Seniors Centre": {
+    "lat": 43.606277,
+    "lng": -79.5268314
+  },
+  "Central Arena": {
+    "lat": 43.64846,
+    "lng": -79.52005
+  },
+  "Eringate Park": {
+    "lat": 43.6630081,
+    "lng": -79.5819956
+  },
+  "Gihon Spring Park": {
+    "lat": 43.7560517,
+    "lng": -79.5950819
+  },
+  "Lambton - Kingsway Park": {
+    "lat": 43.65835,
+    "lng": -79.50788
+  },
+  "Ourland Park": {
+    "lat": 43.6177428,
+    "lng": -79.5087991
+  },
+  "Park Lawn Park": {
+    "lat": 43.6285921,
+    "lng": -79.4897703
+  },
+  "Pine Point Park": {
+    "lat": 43.7120853,
+    "lng": -79.5489429
+  },
+  "Rotary Peace Park": {
+    "lat": 43.59527,
+    "lng": -79.50763
+  },
+  "Sir Adam Beck Junior School": {
+    "lat": 43.601564,
+    "lng": -79.5484481
+  },
+  "West Deane Park": {
+    "lat": 43.66329,
+    "lng": -79.55911
+  },
+  "Silver Creek Park": {
+    "lat": 43.6816832,
+    "lng": -79.5457054
+  },
+  "Port Union Community Recreation Centre": {
+    "lat": 43.7788168,
+    "lng": -79.1406312
+  },
+  "Memorial Pool and Health Club": {
+    "lat": 43.64833,
+    "lng": -79.51968
+  },
+  "Etobicoke Olympium": {
+    "lat": 43.6496639,
+    "lng": -79.5835018
+  },
+  "Albion Pool and Health Club": {
+    "lat": 43.7396133,
+    "lng": -79.580608
+  },
+  "Gus Ryder Pool and Health Club": {
+    "lat": 43.6008789,
+    "lng": -79.5220394
+  },
+  "Alderwood Pool": {
+    "lat": 43.601598,
+    "lng": -79.5473673
+  },
+  "Centennial Park Arena - Etobicoke": {
+    "lat": 43.6561378,
+    "lng": -79.5859128
+  },
+  "Oriole Park - North York": {
+    "lat": 43.7757904,
+    "lng": -79.3474284
+  },
+  "Flagstaff Park": {
+    "lat": 43.7212919,
+    "lng": -79.5911901
+  },
+  "Barbara Frum Recreation Centre": {
+    "lat": 43.720779,
+    "lng": -79.4321831
+  },
+  "Dennis R. Timbrell Resource Centre": {
+    "lat": 43.71812,
+    "lng": -79.332
+  },
+  "Dentonia Park": {
+    "lat": 43.6942512,
+    "lng": -79.29176
+  },
+  "East York Civic Centre": {
+    "lat": 43.691217,
+    "lng": -79.3284013
+  },
+  "Falstaff Community Recreation Centre": {
+    "lat": 43.7166324,
+    "lng": -79.5038287
+  },
+  "Jenner Jean-Marie Community Recreation Centre": {
+    "lat": 43.7029518,
+    "lng": -79.3425925
+  },
+  "Ken Cox Community Centre": {
+    "lat": 43.5954338,
+    "lng": -79.5172359
+  },
+  "Mimico-Coronation Club House": {
+    "lat": 43.6162808,
+    "lng": -79.4998156
+  },
+  "O'Connor Community Centre": {
+    "lat": 43.7176502,
+    "lng": -79.301817
+  },
+  "Scadding Court Community Centre": {
+    "lat": 43.6516045,
+    "lng": -79.404064
+  },
+  "Scarborough Civic Centre": {
+    "lat": 43.7729485,
+    "lng": -79.2575865
+  },
+  "Stephen Leacock Community Recreation Centre": {
+    "lat": 43.786537,
+    "lng": -79.3023569
+  },
+  "Agnes Macphail Junior Elementary School": {
+    "lat": 43.8194003,
+    "lng": -79.2786051
+  },
+  "Albert Campbell Collegiate Institute": {
+    "lat": 43.8100007,
+    "lng": -79.2733572
+  },
+  "Alexmuir Junior Public School": {
+    "lat": 43.809145,
+    "lng": -79.2854422
+  },
+  "Beverly Glen Junior Public School": {
+    "lat": 43.7984984,
+    "lng": -79.3232365
+  },
+  "Bloordale Community School": {
+    "lat": 43.6399318,
+    "lng": -79.5727522
+  },
+  "Calico Public School": {
+    "lat": 43.7384639,
+    "lng": -79.5035087
+  },
+  "Cedar Drive Junior Public School": {
+    "lat": 43.7464842,
+    "lng": -79.2150994
+  },
+  "Cedarbrae Collegiate Institute": {
+    "lat": 43.7564666,
+    "lng": -79.2266924
+  },
+  "Charlottetown Junior Elementary School": {
+    "lat": 43.7821085,
+    "lng": -79.1421949
+  },
+  "Corvette Junior Public School": {
+    "lat": 43.7268682,
+    "lng": -79.2621871
+  },
+  "CW Jefferys Collegiate Institute": {
+    "lat": 43.7583117,
+    "lng": -79.5006458
+  },
+  "DA Morrison Middle School": {
+    "lat": 43.6949778,
+    "lng": -79.3114784
+  },
+  "Elizabeth Simcoe Junior Public School": {
+    "lat": 43.737953,
+    "lng": -79.2062722
+  },
+  "Ellesmere - Statton Public School": {
+    "lat": 43.7633873,
+    "lng": -79.2872847
+  },
+  "George B. Little Public School": {
+    "lat": 43.7710434,
+    "lng": -79.2071388
+  },
+  "Georges Vanier Secondary School": {
+    "lat": 43.7853211,
+    "lng": -79.3508737
+  },
+  "Highcastle Public School": {
+    "lat": 43.7867401,
+    "lng": -79.2122921
+  },
+  "Hilltop Community School": {
+    "lat": 43.6884916,
+    "lng": -79.5320277
+  },
+  "Hollycrest Community School": {
+    "lat": 43.6555218,
+    "lng": -79.5826946
+  },
+  "Humbercrest Public School": {
+    "lat": 43.6606452,
+    "lng": -79.4911073
+  },
+  "Iroquois Junior Public School": {
+    "lat": 43.802453,
+    "lng": -79.2691794
+  },
+  "Islington Community School": {
+    "lat": 43.647313,
+    "lng": -79.5281109
+  },
+  "James S. Bell Community School": {
+    "lat": 43.5939822,
+    "lng": -79.5304898
+  },
+  "John English Community School": {
+    "lat": 43.6118743,
+    "lng": -79.4941436
+  },
+  "John G. Althouse Community School": {
+    "lat": 43.667903,
+    "lng": -79.5544031
+  },
+  "Kingsview Village Community School": {
+    "lat": 43.6977905,
+    "lng": -79.5504978
+  },
+  "L'Amoreaux Collegiate Institute": {
+    "lat": 43.8033029,
+    "lng": -79.3177041
+  },
+  "Lester B. Pearson Collegiate Institute": {
+    "lat": 43.8034817,
+    "lng": -79.2264836
+  },
+  "Lord Roberts Junior Public School": {
+    "lat": 43.741658,
+    "lng": -79.2638054
+  },
+  "Oakdale Park Middle School": {
+    "lat": 43.7475843,
+    "lng": -79.5110854
+  },
+  "O'Connor Public School": {
+    "lat": 43.7164255,
+    "lng": -79.3041205
+  },
+  "Park Lawn Community School": {
+    "lat": 43.6378702,
+    "lng": -79.4963834
+  },
+  "Regina Mundi Catholic School": {
+    "lat": 43.711039,
+    "lng": -79.4594629
+  },
+  "Selwyn Public School": {
+    "lat": 43.7086117,
+    "lng": -79.3059798
+  },
+  "Sir Ernest Macmillan Senior Public School": {
+    "lat": 43.8066969,
+    "lng": -79.3288692
+  },
+  "Sir Oliver Mowat Collegiate Institute": {
+    "lat": 43.7790571,
+    "lng": -79.1432535
+  },
+  "Sloane Public School": {
+    "lat": 43.7311364,
+    "lng": -79.3108616
+  },
+  "Smithfield Community School": {
+    "lat": 43.7497345,
+    "lng": -79.596359
+  },
+  "St. Barnabas Catholic School": {
+    "lat": 43.7974743,
+    "lng": -79.2290218
+  },
+  "St. Marcellus Community School": {
+    "lat": 43.679398,
+    "lng": -79.5541145
+  },
+  "St. Nicholas Of Bari Catholic School": {
+    "lat": 43.6819323,
+    "lng": -79.4599864
+  },
+  "Topcliff Public School": {
+    "lat": 43.7550782,
+    "lng": -79.5104081
+  },
+  "Vaughan Road Academy": {
+    "lat": 43.690826,
+    "lng": -79.4370422
+  },
+  "West Hill Collegiate Institute": {
+    "lat": 43.775624,
+    "lng": -79.1909033
+  },
+  "Wexford Collegiate Institute": {
+    "lat": 43.7458445,
+    "lng": -79.3071299
+  },
+  "White Haven Junior Public School": {
+    "lat": 43.7874776,
+    "lng": -79.2476282
+  },
+  "Woburn Collegiate Institute": {
+    "lat": 43.7788808,
+    "lng": -79.2286428
+  },
+  "York Mills Collegiate Institute": {
+    "lat": 43.7519124,
+    "lng": -79.3736426
+  },
+  "Power House Recreation Centre": {
+    "lat": 43.5934995,
+    "lng": -79.5153278
+  },
+  "Edithvale Community Centre": {
+    "lat": 43.77699,
+    "lng": -79.42654
+  },
+  "McCowan District Park": {
+    "lat": 43.73452,
+    "lng": -79.23747
+  },
+  "Toronto Island Park - Franklin Children's Garden": {
+    "lat": 43.6403629,
+    "lng": -79.3750771
+  },
+  "Walter Perry Junior Public School": {
+    "lat": 43.7334731,
+    "lng": -79.2513829
+  },
+  "Montgomery's Inn": {
+    "lat": 43.65167,
+    "lng": -79.5256917
+  },
+  "George Webster Elementary School": {
+    "lat": 43.7017781,
+    "lng": -79.2990807
+  },
+  "Warden Hilltop Community Centre": {
+    "lat": 43.7146865,
+    "lng": -79.2802879
+  },
+  "Stephen Leacock Seniors Community Centre": {
+    "lat": 43.7868718,
+    "lng": -79.3024731
+  },
+  "John D. Parker Junior Public School": {
+    "lat": 43.7534948,
+    "lng": -79.5959381
+  },
+  "Westmount Park": {
+    "lat": 43.6884255,
+    "lng": -79.5184886
+  },
+  "Pam McConnell Aquatic Centre": {
+    "lat": 43.6612253,
+    "lng": -79.3610976
+  },
+  "Toronto Island Park - Island Park": {
+    "lat": 43.6403629,
+    "lng": -79.3750771
+  },
+  "McGregor Park": {
+    "lat": 43.7483669,
+    "lng": -79.2799228
+  },
+  "Jack Goodlad Park": {
+    "lat": 43.7422518,
+    "lng": -79.2718962
+  },
+  "Dennis Flynn Park": {
+    "lat": 43.6421446,
+    "lng": -79.5661263
+  },
+  "Toronto Pan Am Sports Centre": {
+    "lat": 43.7907755,
+    "lng": -79.1936912
+  },
+  "St. Ambrose Catholic School": {
+    "lat": 43.6084989,
+    "lng": -79.5501965
+  },
+  "St. Gerald Catholic School": {
+    "lat": 43.7811245,
+    "lng": -79.3266267
+  },
+  "Parkway Forest Community Centre": {
+    "lat": 43.77254,
+    "lng": -79.34389
+  },
+  "Davisville Junior Public School": {
+    "lat": 43.699002,
+    "lng": -79.3946752
+  },
+  "Central Etobicoke High School": {
+    "lat": 43.6788565,
+    "lng": -79.5564559
+  },
+  "Crestview Public School": {
+    "lat": 43.7883125,
+    "lng": -79.3599103
+  },
+  "Lynngate Junior Public School": {
+    "lat": 43.7763045,
+    "lng": -79.3005837
+  },
+  "Scarborough Arena Gardens": {
+    "lat": 43.6933347,
+    "lng": -79.2622512
+  },
+  "York Recreation Centre": {
+    "lat": 43.68784,
+    "lng": -79.48201
+  },
+  "Regent Park Community Centre": {
+    "lat": 43.6581255,
+    "lng": -79.3617443
+  },
+  "St. Joachim Catholic School": null,
+  "St. Maurice Catholic School": {
+    "lat": 43.6978557,
+    "lng": -79.5536116
+  },
+  "Tredway Woodsworth Public School": {
+    "lat": 43.7648061,
+    "lng": -79.2353761
+  },
+  "St. Nicholas Catholic School": {
+    "lat": 43.7477595,
+    "lng": -79.2328842
+  },
+  "St. André Catholic School": {
+    "lat": 43.7238976,
+    "lng": -79.5180065
+  },
+  "Sorauren Avenue Fieldhouse": {
+    "lat": 43.6480578,
+    "lng": -79.4430859
+  },
+  "Canoe Landing Community Recreation Centre": {
+    "lat": 43.63984,
+    "lng": -79.39465
+  },
+  "High Park - Children's Garden and Teaching Kitchen": null,
+  "One Yonge Community Recreation Centre": {
+    "lat": 43.6435658,
+    "lng": -79.3738
+  },
+  "Ethennonnhawahstihnen' Community Recreation Centre and Library": {
+    "lat": 43.76872,
+    "lng": -79.3758
+  },
+  "Timberbank Junior Public School": {
+    "lat": 43.7916377,
+    "lng": -79.3072973
+  },
+  "Ionview Public School": {
+    "lat": 43.7378772,
+    "lng": -79.2747666
+  },
+  "St. Michael Catholic School": {
+    "lat": 43.60958,
+    "lng": -79.49454
+  },
+  "Burrows Hall Junior Public School": {
+    "lat": 43.7927623,
+    "lng": -79.2288107
+  },
+  "St. John XXIII Catholic School": {
+    "lat": 43.7125938,
+    "lng": -79.3296635
+  },
+  "Pape Avenue Junior Public School": {
+    "lat": 43.6778851,
+    "lng": -79.3395157
+  },
+  "Biidaasige Park": {
+    "lat": 43.6465,
+    "lng": -79.34893
+  },
+  "East Bayfront Community Recreation Centre": {
+    "lat": 43.64634,
+    "lng": -79.36129
+  },
+  "Rouge Valley Community Recreation Centre": {
+    "lat": 43.8042937,
+    "lng": -79.1901416
+  },
+  "Old Fire Hall 30": {
+    "lat": 43.64602,
+    "lng": -79.35002
+  },
+  "St. Fidelis Catholic Elementary School": {
+    "lat": 43.7180515,
+    "lng": -79.4946102
+  },
+  "McMurrich Junior Public School": {
+    "lat": 43.6781455,
+    "lng": -79.4305786
+  }
+}

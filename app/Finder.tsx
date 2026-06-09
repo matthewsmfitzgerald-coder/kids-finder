@@ -4,7 +4,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import type { Program } from "./types";
+import { ageLabel } from "./format";
 
 // Day options in calendar order. Our data stores days as "Mon,Wed,Fri", so we
 // match by checking whether the chosen day is one of those tokens.
@@ -14,13 +16,12 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 // ALL programs (so the count is accurate), but the DOM stays small and snappy.
 const RENDER_CAP = 150;
 
-// Turn an age range into a short human label for a card.
-function ageLabel(min: number | null, max: number | null): string {
-  if (min !== null && max !== null) return `Ages ${min}–${max}`;
-  if (min !== null) return `Ages ${min}+`;
-  if (max !== null) return `Up to age ${max}`;
-  return "All ages";
-}
+// The map is loaded only in the browser (Leaflet needs the DOM/window), so we
+// import it dynamically with server-side rendering turned off.
+const ProgramMap = dynamic(() => import("./ProgramMap"), {
+  ssr: false,
+  loading: () => <p className="text-gray-600">Loading map…</p>,
+});
 
 export default function Finder() {
   // --- Loaded data ----------------------------------------------------------
@@ -34,6 +35,9 @@ export default function Finder() {
   const [category, setCategory] = useState("");
   const [age, setAge] = useState(""); // kept as text so the box can be empty
   const [day, setDay] = useState("");
+
+  // Which view is showing: the card list or the map. Both use the same filters.
+  const [view, setView] = useState<"list" | "map">("list");
 
   // Load the static JSON once, when the component first appears in the browser.
   useEffect(() => {
@@ -89,6 +93,27 @@ export default function Finder() {
   }, [programs, query, district, category, age, day]);
 
   const shown = filtered.slice(0, RENDER_CAP);
+
+  // How many distinct locations the map can plot for the current filters.
+  const locationCount = useMemo(
+    () =>
+      new Set(
+        filtered.filter((p) => p.lat !== null && p.lng !== null).map((p) => p.location_name)
+      ).size,
+    [filtered]
+  );
+
+  // Any filter set? Drives whether we show the "Clear filters" button.
+  const hasActiveFilters = Boolean(query || district || category || age || day);
+
+  // Reset every filter back to its empty state.
+  function clearFilters() {
+    setQuery("");
+    setDistrict("");
+    setCategory("");
+    setAge("");
+    setDay("");
+  }
 
   // Shared Tailwind classes for the form controls, to avoid repetition.
   const control =
@@ -149,17 +174,58 @@ export default function Finder() {
         </select>
       </section>
 
-      {/* Status line: loading, error, or the "showing X of Y" count. */}
+      {/* View toggle + status line: loading, error, or the count. */}
       {loading && <p className="text-gray-600">Loading programs…</p>}
       {error && <p className="text-red-600">Couldn’t load programs: {error}</p>}
       {!loading && !error && (
-        <p className="mb-3 text-sm text-gray-600">
-          Showing {shown.length} of {filtered.length} matching programs
-          {filtered.length > RENDER_CAP && " (refine your filters to see more)"}.
-        </p>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-gray-600">
+            {view === "list" ? (
+              <>
+                Showing {shown.length} of {filtered.length} matching programs
+                {filtered.length > RENDER_CAP && " (refine to see more)"}.
+              </>
+            ) : (
+              <>
+                {filtered.length} matching programs at {locationCount} locations.
+              </>
+            )}
+          </p>
+          <div className="flex items-center gap-2">
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="shrink-0 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Clear filters
+              </button>
+            )}
+            {/* Segmented List / Map control */}
+            <div className="inline-flex overflow-hidden rounded-lg border border-gray-300 text-sm">
+              {(["list", "map"] as const).map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setView(v)}
+                  className={
+                    "px-3 py-1.5 font-medium capitalize " +
+                    (view === v
+                      ? "bg-blue-600 text-white"
+                      : "bg-white text-gray-700 hover:bg-gray-50")
+                  }
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Results */}
+      {/* Map view */}
+      {!loading && !error && view === "map" && <ProgramMap programs={filtered} />}
+
+      {/* List view */}
+      {view === "list" && (
       <ul className="space-y-3">
         {shown.map((p) => (
           <li
@@ -215,6 +281,7 @@ export default function Finder() {
           </li>
         ))}
       </ul>
+      )}
 
       {!loading && !error && filtered.length === 0 && (
         <p className="text-gray-600">No programs match your filters. Try widening them.</p>

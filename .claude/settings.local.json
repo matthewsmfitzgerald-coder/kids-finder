@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python3 data_prep.py)"
+      "Bash(python3 data_prep.py)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npx tsc *)",
+      "Bash(npx eslint *)",
+      "Bash(curl -s \"https://ckan0.cf.opendata.inter.prod-toronto.ca/api/3/action/datastore_search?resource_id=e16505dc-f106-4b58-a689-ed0a2b8b0b69&limit=2\")",
+      "Bash(python3 -c ' *)",
+      "Bash(npm install *)",
+      "Bash(git check-ignore *)"
     ]
   }
 }

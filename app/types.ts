@@ -24,4 +24,6 @@ export type Program = {
   registration_date: string | null;
   activity_url: string | null; // ActiveCommunities registration link
   status: string | null;
+  lat: number | null; // map latitude (null if the address couldn't be geocoded)
+  lng: number | null; // map longitude
 };
