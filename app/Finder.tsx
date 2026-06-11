@@ -16,6 +16,33 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 // ALL programs (so the count is accurate), but the DOM stays small and snappy.
 const RENDER_CAP = 150;
 
+// Reorder the merged list so the default view doesn't lead with all City rows
+// then all private rows (which buries private listings and violates neutral
+// ranking). We round-robin across sources: one record from each source in turn,
+// repeating until all are drained. It's deterministic (buckets keep their
+// stable input order), so the list never reshuffles between loads. See SCHEMA.md
+// "Known inconsistencies / future work" for the multi-operator caveat.
+function interleaveBySource(programs: Program[]): Program[] {
+  const buckets = new Map<string, Program[]>();
+  for (const p of programs) {
+    const key = p.source || "";
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key)!.push(p);
+  }
+  const lists = [...buckets.values()];
+  const result: Program[] = [];
+  for (let round = 0, added = true; added; round++) {
+    added = false;
+    for (const list of lists) {
+      if (round < list.length) {
+        result.push(list[round]);
+        added = true;
+      }
+    }
+  }
+  return result;
+}
+
 // The map is loaded only in the browser (Leaflet needs the DOM/window), so we
 // import it dynamically with server-side rendering turned off.
 const ProgramMap = dynamic(() => import("./ProgramMap"), {
@@ -73,6 +100,11 @@ export default function Finder() {
     [programs]
   );
 
+  // Source-neutral default order: round-robin across sources so the unfiltered
+  // list interleaves City and private instead of leading with all City rows.
+  // Computed once per data load; filtering preserves this order.
+  const orderedPrograms = useMemo(() => interleaveBySource(programs), [programs]);
+
   // The actual filtering. useMemo means this only recomputes when the data or
   // one of the filter inputs changes -- not on every re-render.
   const filtered = useMemo(() => {
@@ -80,7 +112,7 @@ export default function Finder() {
     const ageText = age.trim();
     const ageNum = ageText === "" ? null : Number(ageText);
 
-    return programs.filter((p) => {
+    return orderedPrograms.filter((p) => {
       // Search box: match against activity + course title.
       if (q) {
         const haystack = `${p.activity_title ?? ""} ${p.course_title ?? ""}`.toLowerCase();
@@ -100,7 +132,7 @@ export default function Finder() {
       }
       return true;
     });
-  }, [programs, query, municipality, category, programType, age, day, source]);
+  }, [orderedPrograms, query, municipality, category, programType, age, day, source]);
 
   const shown = filtered.slice(0, RENDER_CAP);
 

@@ -129,3 +129,4 @@ ambiguous you had to make a judgment call on — so I can verify it by hand.
 ## Known inconsistencies / future work
 
 - City non-camp categories are coarser (e.g. `Sports`) than the finer activity values the camp mapping introduces (e.g. `Soccer`); unify in a later normalization pass if user feedback warrants.
+- The finder's default (unfiltered) order round-robins per operator (N-way), which surfaces tiny sources high. Once there are many operators of very different sizes, the default ordering may need to balance per-operator fairness against over-surfacing tiny sources — revisit when real operator data exists.
