@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import type { Program } from "./types";
-import { ageLabel } from "./format";
+import { ageLabel, programTypeLabel, dayMatches } from "./format";
 
 // Day options in calendar order. Our data stores days as "Mon,Wed,Fri", so we
 // match by checking whether the chosen day is one of those tokens.
@@ -31,10 +31,12 @@ export default function Finder() {
 
   // --- Filter inputs (what the parent types/selects) ------------------------
   const [query, setQuery] = useState("");
-  const [district, setDistrict] = useState("");
+  const [municipality, setMunicipality] = useState(""); // primary geographic filter
   const [category, setCategory] = useState("");
+  const [programType, setProgramType] = useState("");
   const [age, setAge] = useState(""); // kept as text so the box can be empty
   const [day, setDay] = useState("");
+  const [source, setSource] = useState("");
 
   // Which view is showing: the card list or the map. Both use the same filters.
   const [view, setView] = useState<"list" | "map">("list");
@@ -53,12 +55,21 @@ export default function Finder() {
 
   // Build the dropdown option lists from the data itself, sorted alphabetically.
   // useMemo caches the result so we don't redo this work on every keystroke.
-  const districts = useMemo(
-    () => [...new Set(programs.map((p) => p.district).filter(Boolean))].sort(),
+  const municipalities = useMemo(
+    () => [...new Set(programs.map((p) => p.municipality).filter(Boolean))].sort(),
     [programs]
   );
   const categories = useMemo(
     () => [...new Set(programs.map((p) => p.category).filter(Boolean))].sort(),
+    [programs]
+  );
+  const programTypes = useMemo(
+    () => [...new Set(programs.map((p) => p.program_type).filter(Boolean))].sort(),
+    [programs]
+  );
+  // Sorted alphabetically so no provider is presented above another.
+  const sources = useMemo(
+    () => [...new Set(programs.map((p) => p.source).filter(Boolean))].sort(),
     [programs]
   );
 
@@ -75,14 +86,13 @@ export default function Finder() {
         const haystack = `${p.activity_title ?? ""} ${p.course_title ?? ""}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
-      // District / category dropdowns ("" means "All").
-      if (district && p.district !== district) return false;
+      // Dropdown filters ("" means "All").
+      if (municipality && p.municipality !== municipality) return false;
       if (category && p.category !== category) return false;
-      // Day of week: is the chosen day one of this program's days?
-      if (day) {
-        const tokens = (p.days ?? "").split(",").map((d) => d.trim());
-        if (!tokens.includes(day)) return false;
-      }
+      if (programType && p.program_type !== programType) return false;
+      if (source && p.source !== source) return false;
+      // Day of week: tolerant of "Mon,Tue", "Saturday", and "Mon–Fri" formats.
+      if (day && !dayMatches(p.days, day)) return false;
       // Child's age: keep programs whose age range includes the entered age.
       if (ageNum !== null && !Number.isNaN(ageNum)) {
         if (p.age_min_years !== null && ageNum < p.age_min_years) return false;
@@ -90,7 +100,7 @@ export default function Finder() {
       }
       return true;
     });
-  }, [programs, query, district, category, age, day]);
+  }, [programs, query, municipality, category, programType, age, day, source]);
 
   const shown = filtered.slice(0, RENDER_CAP);
 
@@ -104,15 +114,19 @@ export default function Finder() {
   );
 
   // Any filter set? Drives whether we show the "Clear filters" button.
-  const hasActiveFilters = Boolean(query || district || category || age || day);
+  const hasActiveFilters = Boolean(
+    query || municipality || category || programType || age || day || source
+  );
 
   // Reset every filter back to its empty state.
   function clearFilters() {
     setQuery("");
-    setDistrict("");
+    setMunicipality("");
     setCategory("");
+    setProgramType("");
     setAge("");
     setDay("");
+    setSource("");
   }
 
   // Shared Tailwind classes for the form controls, to avoid repetition.
@@ -124,10 +138,11 @@ export default function Finder() {
     <main className="mx-auto w-full max-w-3xl px-4 py-6">
       <header className="mb-5">
         <h1 className="text-2xl font-bold text-gray-900">
-          Toronto Kids&apos; Activity Finder
+          GTA Kids&apos; Activity Finder
         </h1>
         <p className="mt-1 text-sm text-gray-600">
-          Search City of Toronto registered recreation programs for children.
+          Search children&apos;s programs, camps, and activities across the GTA, from
+          the City of Toronto and other providers.
         </p>
       </header>
 
@@ -140,19 +155,27 @@ export default function Finder() {
           placeholder="Search by activity (e.g. swimming)"
           className={`${control} sm:col-span-2`}
         />
-        <select value={district} onChange={(e) => setDistrict(e.target.value)} className={control}>
-          <option value="">All districts</option>
-          {districts.map((d) => (
-            <option key={d} value={d!}>
-              {d}
+        <select value={municipality} onChange={(e) => setMunicipality(e.target.value)} className={control}>
+          <option value="">All municipalities</option>
+          {municipalities.map((m) => (
+            <option key={m} value={m}>
+              {m}
             </option>
           ))}
         </select>
         <select value={category} onChange={(e) => setCategory(e.target.value)} className={control}>
           <option value="">All categories</option>
           {categories.map((c) => (
-            <option key={c} value={c!}>
+            <option key={c} value={c}>
               {c}
+            </option>
+          ))}
+        </select>
+        <select value={programType} onChange={(e) => setProgramType(e.target.value)} className={control}>
+          <option value="">All program types</option>
+          {programTypes.map((t) => (
+            <option key={t} value={t}>
+              {programTypeLabel(t)}
             </option>
           ))}
         </select>
@@ -169,6 +192,14 @@ export default function Finder() {
           {DAYS.map((d) => (
             <option key={d} value={d}>
               {d}
+            </option>
+          ))}
+        </select>
+        <select value={source} onChange={(e) => setSource(e.target.value)} className={control}>
+          <option value="">All sources</option>
+          {sources.map((s) => (
+            <option key={s} value={s!}>
+              {s}
             </option>
           ))}
         </select>
@@ -229,7 +260,7 @@ export default function Finder() {
       <ul className="space-y-3">
         {shown.map((p) => (
           <li
-            key={p.course_id}
+            key={p.id}
             className="overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
           >
             <div className="flex items-start justify-between gap-3">
@@ -237,11 +268,21 @@ export default function Finder() {
                 <h2 className="font-semibold text-gray-900 break-words">
                   {p.activity_title ?? p.course_title}
                 </h2>
-                {p.category && (
-                  <span className="mt-1 inline-block rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
-                    {p.category}
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {p.category && (
+                    <span className="inline-block rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                      {p.category}
+                    </span>
+                  )}
+                  {p.program_type && (
+                    <span className="inline-block rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
+                      {programTypeLabel(p.program_type)}
+                    </span>
+                  )}
+                  <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                    {p.source}
                   </span>
-                )}
+                </div>
               </div>
               <span className="whitespace-nowrap text-sm text-gray-500">
                 {ageLabel(p.age_min_years, p.age_max_years)}
@@ -252,7 +293,8 @@ export default function Finder() {
               <div>
                 <span className="text-gray-500">Where: </span>
                 {p.location_name}
-                {p.district && ` · ${p.district}`}
+                {p.municipality && ` · ${p.municipality}`}
+                {p.sub_area && ` (${p.sub_area})`}
               </div>
               <div>
                 <span className="text-gray-500">When: </span>
@@ -263,6 +305,12 @@ export default function Finder() {
                 <div>
                   <span className="text-gray-500">Dates: </span>
                   {p.date_range}
+                </div>
+              )}
+              {p.price && (
+                <div>
+                  <span className="text-gray-500">Price: </span>
+                  {p.price}
                 </div>
               )}
               {p.status && <div className="text-gray-500">{p.status}</div>}

@@ -29,7 +29,7 @@ type LocationGroup = {
   name: string;
   lat: number;
   lng: number;
-  district: string | null;
+  municipality: string;
   programs: Program[];
 };
 
@@ -44,7 +44,7 @@ function groupByLocation(programs: Program[]): LocationGroup[] {
         name: p.location_name,
         lat: p.lat,
         lng: p.lng,
-        district: p.district,
+        municipality: p.municipality,
         programs: [],
       };
       groups.set(p.location_name, group);
@@ -87,13 +87,13 @@ export default function ProgramMap({ programs }: { programs: Program[] }) {
             <Popup>
               <div className="max-h-60 w-56 overflow-y-auto">
                 <p className="font-semibold text-gray-900">{g.name}</p>
-                {g.district && <p className="text-gray-500">{g.district}</p>}
+                {g.municipality && <p className="text-gray-500">{g.municipality}</p>}
                 <p className="mt-1 text-gray-500">
                   {g.programs.length} program{g.programs.length === 1 ? "" : "s"}
                 </p>
                 <ul className="mt-2 space-y-2">
                   {g.programs.slice(0, MAX_POPUP_PROGRAMS).map((p) => (
-                    <li key={p.course_id} className="border-t border-gray-100 pt-2">
+                    <li key={p.id} className="border-t border-gray-100 pt-2">
                       <div className="font-medium text-gray-900">
                         {p.activity_title ?? p.course_title}
                       </div>
@@ -102,6 +102,7 @@ export default function ProgramMap({ programs }: { programs: Program[] }) {
                         {p.days && ` · ${p.days}`}
                         {p.start_time && ` · ${p.start_time}–${p.end_time}`}
                       </div>
+                      <div className="text-gray-400">{p.source}</div>
                       {p.activity_url && (
                         <a
                           href={p.activity_url}

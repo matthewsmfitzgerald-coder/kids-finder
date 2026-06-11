@@ -1031,5 +1031,25 @@
   "McMurrich Junior Public School": {
     "lat": 43.6781455,
     "lng": -79.4305786
+  },
+  "Canlan Sports - York University": {
+    "lat": 43.7622125,
+    "lng": -79.5025166
+  },
+  "Scarborough Music Studio": {
+    "lat": 43.7283755,
+    "lng": -79.2955618
+  },
+  "Placeholder Arena (sample)": {
+    "lat": 43.6365617,
+    "lng": -79.3968727
+  },
+  "Placeholder Community Centre (sample)": {
+    "lat": 43.3845643,
+    "lng": -79.7345146
+  },
+  "Placeholder School (sample)": {
+    "lat": 43.6449605,
+    "lng": -79.3858597
   }
 }

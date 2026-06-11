@@ -12,8 +12,11 @@ What it does, in order:
   1. Downloads all rows from the two CKAN "datastore" resources (paginated).
   2. Builds a lookup of Location ID -> location details.
   3. For each program: joins its location, converts ages from MONTHS to years,
-     keeps only child-relevant programs, and reshapes it into a tidy object.
-  4. Writes the resulting list to public/programs.json.
+     keeps only child-relevant programs, and reshapes it into the v2 schema
+     (see SCHEMA.md) -- including the geography hierarchy and source tagging.
+  4. Merges in hand-maintained private/non-city programs from
+     data/private_programs.json (already in v2; passed through unchanged).
+  5. Geocodes every location and writes the merged list to public/programs.json.
 
 There is no web framework here and nothing secret -- it's just an HTTP client
 plus some data cleaning.
@@ -22,6 +25,7 @@ plus some data cleaning.
 import json
 import sys
 import time
+from datetime import date
 from pathlib import Path
 
 import requests
@@ -52,6 +56,25 @@ GEOCODE_DELAY_SECONDS = 1.0
 # committed to the repo on purpose -- it's our coordinate lookup table.
 GEOCODE_CACHE_PATH = Path(__file__).parent / "geocode_cache.json"
 
+# Hand-maintained private / non-city programs to merge in.
+PRIVATE_PATH = Path(__file__).parent / "data" / "private_programs.json"
+CITY_SOURCE = "City of Toronto"
+
+# The v2 schema (see SCHEMA.md). Every record carries these fields; the pipeline
+# additionally attaches derived lat/lng for the map. We use this list to
+# normalize private records so a missing key never crashes the app.
+PROGRAM_FIELDS_V2 = [
+    "id", "source", "source_type",
+    "activity_title", "course_title", "category", "program_type",
+    "age_min_years", "age_max_years",
+    "days", "start_time", "end_time", "date_range", "registration_date", "status",
+    "province", "municipality", "sub_area", "location_name", "address", "postal_code",
+    "price", "activity_url", "last_updated",
+]
+# The only numeric fields; everything else is text. Drives the default we fill
+# in for a missing key (null for numbers, "" for text -- the SCHEMA convention).
+NUMBER_FIELDS = {"age_min_years", "age_max_years"}
+
 
 # --- Small helpers -----------------------------------------------------------
 
@@ -68,6 +91,16 @@ def clean(value):
     if text == "" or text.lower() == "none":
         return None
     return text
+
+
+def text(value):
+    """Cleaned text, or '' when missing.
+
+    The v2 schema's convention is: unknown text -> "" (not null). clean() gives
+    us None for missing values, so this wrapper turns that into "".
+    """
+    cleaned = clean(value)
+    return cleaned if cleaned is not None else ""
 
 
 def to_int(value):
@@ -165,17 +198,22 @@ def attach_coordinates(programs):
     cache the result, and copy the coordinates onto every program there.
     """
     # Build "location name -> best address query" for each distinct location.
+    # The query is built from the record's own geography (municipality/province)
+    # rather than a hard-coded "Toronto" -- the data is GTA-wide now.
     queries = {}
     for p in programs:
         name = p["location_name"]
         if not name or name in queries:
             continue
-        address = p["address"]
-        postal = p["postal_code"]
+        address = p.get("address") or ""
+        if not address:
+            continue  # no street address -> can't geocode; leave it off the map
+        bits = [address, p.get("municipality") or "", p.get("province") or ""]
+        query = ", ".join(bit for bit in bits if bit)
+        postal = p.get("postal_code") or ""
         if postal:
-            queries[name] = f"{address}, Toronto, ON {postal}, Canada"
-        else:
-            queries[name] = f"{address}, Toronto, ON, Canada"
+            query += f" {postal}"
+        queries[name] = f"{query}, Canada"
 
     cache = load_geocode_cache()
     pending = [(name, q) for name, q in queries.items() if name not in cache]
@@ -200,6 +238,47 @@ def attach_coordinates(programs):
         coords = cache.get(p["location_name"])
         p["lat"] = coords["lat"] if coords else None
         p["lng"] = coords["lng"] if coords else None
+
+
+# --- Private (non-city) programs ---------------------------------------------
+
+def load_private_programs():
+    """Read the hand-maintained private programs file, tolerating problems.
+
+    The file is already in the v2 schema, so we PASS VALUES THROUGH UNCHANGED.
+    We only ensure every v2 field is present (filling a missing key with "" for
+    text or None for a number) so a partial record can't crash the app. Missing
+    file, empty file, or invalid JSON all return [] with a friendly message.
+    """
+    if not PRIVATE_PATH.exists():
+        print(f"  No private file at {PRIVATE_PATH} -- skipping.")
+        return []
+
+    raw_text = PRIVATE_PATH.read_text(encoding="utf-8").strip()
+    if not raw_text:
+        print("  Private file is empty -- skipping.")
+        return []
+
+    try:
+        records = json.loads(raw_text)
+    except json.JSONDecodeError as err:
+        print(f"  WARNING: private file is not valid JSON ({err}) -- skipping.")
+        return []
+
+    if not isinstance(records, list):
+        print("  WARNING: private file should be a JSON array -- skipping.")
+        return []
+
+    normalized = []
+    for raw in records:
+        rec = {}
+        for field in PROGRAM_FIELDS_V2:
+            if field in raw:
+                rec[field] = raw[field]  # provided -> pass through untouched
+            else:
+                rec[field] = None if field in NUMBER_FIELDS else ""
+        normalized.append(rec)
+    return normalized
 
 
 # --- Data fetching -----------------------------------------------------------
@@ -243,6 +322,7 @@ def main():
     programs = fetch_all(PROGRAMS_RESOURCE_ID, "programs")
 
     print("Joining, filtering, and reshaping...")
+    today = date.today().isoformat()  # last_updated stamp for the city rows
     output = []
     skipped_no_age = 0
     skipped_not_child = 0
@@ -263,42 +343,67 @@ def main():
 
         loc = location_by_id.get(p.get("Location ID"), {})
 
+        # Map the City's fields onto the v2 schema (see SCHEMA.md):
+        #  - source_type=city, province=Ontario, municipality=Toronto
+        #  - the City's "District" becomes sub_area
+        #  - program_type=registered_program (this is the Registered Programs feed)
+        #  - id = "toronto-" + the City's Course_ID
+        #  - price is left "" (the City feed has none)
         output.append({
-            "course_id": p.get("Course_ID"),
-            "activity_title": clean(p.get("Activity Title")),
-            "course_title": clean(p.get("Course Title")),
-            "category": clean(p.get("Program Category")),
-            "section": clean(p.get("Section")),
-            "district": normalize_district(loc.get("District")),
-            "location_name": clean(loc.get("Location Name")),
-            "address": build_address(loc),
-            "postal_code": clean(loc.get("Postal Code")),
+            "id": f"toronto-{p.get('Course_ID')}",
+            "source": CITY_SOURCE,
+            "source_type": "city",
+            "activity_title": text(p.get("Activity Title")),
+            "course_title": text(p.get("Course Title")),
+            "category": text(p.get("Program Category")),
+            "program_type": "registered_program",
             "age_min_years": age_min_years,
             "age_max_years": months_to_years(max_months),  # None == no upper limit
-            "days": clean(p.get("Days of The Week")),
-            "start_time": format_time(to_int(p.get("Start Hour")), to_int(p.get("Start Min"))),
-            "end_time": format_time(to_int(p.get("End Hour")), to_int(p.get("End Min"))),
-            "date_range": clean(p.get("From To")),
-            "registration_date": clean(p.get("Registration Date")),
-            "activity_url": clean(p.get("Activity URL")),
-            "status": clean(p.get("Status / Information")),
+            "days": text(p.get("Days of The Week")),
+            "start_time": format_time(to_int(p.get("Start Hour")), to_int(p.get("Start Min"))) or "",
+            "end_time": format_time(to_int(p.get("End Hour")), to_int(p.get("End Min"))) or "",
+            "date_range": text(p.get("From To")),
+            "registration_date": text(p.get("Registration Date")),
+            "status": text(p.get("Status / Information")),
+            "province": "Ontario",
+            "municipality": "Toronto",
+            "sub_area": normalize_district(loc.get("District")) or "",
+            "location_name": text(loc.get("Location Name")),
+            "address": build_address(loc) or "",
+            "postal_code": text(loc.get("Postal Code")),
+            "price": "",
+            "activity_url": text(p.get("Activity URL")),
+            "last_updated": today,
         })
 
-    # Turn each location's address into map coordinates (lat/lng).
-    print("Adding map coordinates...")
-    attach_coordinates(output)
+    # Merge in the hand-maintained private (non-city) programs.
+    print("Reading private (non-city) programs...")
+    private = load_private_programs()
+    print(f"  Loaded {len(private)} private programs.")
 
-    # Ensure public/ exists, then write the file (compact but valid JSON).
+    # Private records bring their own id; only fill a blank one so the app's
+    # React keys stay unique. We don't otherwise touch private values.
+    for i, rec in enumerate(private, start=1):
+        if not rec.get("id"):
+            rec["id"] = f"private-{i}"
+
+    combined = output + private
+
+    # Geocode all locations (city + private) so private programs map too.
+    print("Adding map coordinates...")
+    attach_coordinates(combined)
+
+    # Ensure public/ exists, then write the merged file (compact but valid JSON).
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with OUTPUT_PATH.open("w", encoding="utf-8") as f:
-        json.dump(output, f, ensure_ascii=False)
+        json.dump(combined, f, ensure_ascii=False)
 
-    with_coords = sum(1 for p in output if p["lat"] is not None)
+    with_coords = sum(1 for p in combined if p["lat"] is not None)
     print()
-    print(f"Kept {len(output)} child-relevant programs.")
+    print(f"Kept {len(output)} city + {len(private)} private = {len(combined)} programs.")
     print(f"  Skipped {skipped_no_age} with no readable Min Age.")
     print(f"  Skipped {skipped_not_child} whose min age was {CHILD_MAX_AGE_YEARS}+.")
-    print(f"  {with_coords} of {len(output)} programs have map coordinates.")
+    print(f"  {with_coords} of {len(combined)} programs have map coordinates.")
     size_kb = OUTPUT_PATH.stat().st_size / 1024
     print(f"Wrote {OUTPUT_PATH} ({size_kb:.0f} KB)")
 
