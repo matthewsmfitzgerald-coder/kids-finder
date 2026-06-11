@@ -23,6 +23,7 @@ plus some data cleaning.
 """
 
 import json
+import re
 import sys
 import time
 from datetime import date
@@ -155,6 +156,78 @@ def build_address(loc):
         clean(loc.get("Street Direction")),
     ]
     return " ".join(p for p in parts if p) or None
+
+
+# --- category (ACTIVITY) vs program_type (FORMAT) ----------------------------
+# SCHEMA.md rule: a FORMAT value (Camp, Drop-in, After-School) must never land in
+# `category`. Sources like the City put "Camps" in their category field, so at
+# ingest we move the format to `program_type` and put the real ACTIVITY (or a
+# catch-all) in `category`.
+
+# Format words that may hide in a source's category/section field, mapped to the
+# v2 program_type they really mean. First match wins.
+FORMAT_WORD_TO_TYPE = [
+    ("camp", "camp"),
+    ("after-school", "after_school"),
+    ("after school", "after_school"),
+    ("drop-in", "drop_in"),
+    ("drop in", "drop_in"),
+]
+DEFAULT_PROGRAM_TYPE = "registered_program"
+CATCHALL_CATEGORY = "General"  # used when a format record states no real activity
+
+# Recover a real ACTIVITY from a title. Grounded in the text only -- we never
+# invent a sport that isn't written there. First match wins (order matters).
+ACTIVITY_KEYWORDS = [
+    ("Swimming", r"swim|aquatic"),
+    ("Skating", r"skat"),
+    ("Hockey", r"hockey"),
+    ("Soccer", r"soccer"),
+    ("Basketball", r"basketball"),
+    ("Tennis", r"tennis"),
+    ("Dance", r"dance|ballet"),
+    ("Gymnastics", r"gymnastic"),
+    ("Martial Arts", r"karate|judo|taekwondo|martial"),
+    ("Arts", r"\bart\b|paint|drawing|craft|music|drama|pottery"),
+]
+
+
+def detect_program_type(*fields):
+    """Pick a program_type by scanning category/section text for a format word."""
+    haystack = " ".join((f or "") for f in fields).lower()
+    for word, ptype in FORMAT_WORD_TO_TYPE:
+        if word in haystack:
+            return ptype
+    return DEFAULT_PROGRAM_TYPE
+
+
+def category_is_format(raw_category):
+    """True if the source put a FORMAT word in its category field (e.g. 'Camps')."""
+    low = (raw_category or "").lower()
+    return any(word in low for word, _ in FORMAT_WORD_TO_TYPE)
+
+
+def recover_activity(activity_title, course_title):
+    """Find a real ACTIVITY in the titles, or None if none is stated."""
+    for title in (activity_title, course_title):
+        blob = (title or "").lower()
+        for category, pattern in ACTIVITY_KEYWORDS:
+            if re.search(pattern, blob):
+                return category
+    return None
+
+
+def resolve_category(raw_category, activity_title, course_title):
+    """Return an ACTIVITY for `category`, never a format word.
+
+    If the source's category is a real activity (Swimming, Arts...), keep it.
+    If it's a format word ("Camps"), recover the activity from the title, or
+    fall back to the catch-all -- but never leave the format word in `category`.
+    """
+    base = clean(raw_category) or ""
+    if not category_is_format(base):
+        return base
+    return recover_activity(activity_title, course_title) or CATCHALL_CATEGORY
 
 
 # --- Geocoding ---------------------------------------------------------------
@@ -343,10 +416,17 @@ def main():
 
         loc = location_by_id.get(p.get("Location ID"), {})
 
+        # Separate the ACTIVITY (category) from the FORMAT (program_type). The
+        # City leaks formats like "Camps" into its category field, so we detect
+        # the format and recover the real activity (see SCHEMA.md rule).
+        program_type = detect_program_type(p.get("Program Category"), p.get("Section"))
+        category = resolve_category(
+            p.get("Program Category"), p.get("Activity Title"), p.get("Course Title")
+        )
+
         # Map the City's fields onto the v2 schema (see SCHEMA.md):
         #  - source_type=city, province=Ontario, municipality=Toronto
         #  - the City's "District" becomes sub_area
-        #  - program_type=registered_program (this is the Registered Programs feed)
         #  - id = "toronto-" + the City's Course_ID
         #  - price is left "" (the City feed has none)
         output.append({
@@ -355,8 +435,8 @@ def main():
             "source_type": "city",
             "activity_title": text(p.get("Activity Title")),
             "course_title": text(p.get("Course Title")),
-            "category": text(p.get("Program Category")),
-            "program_type": "registered_program",
+            "category": category,
+            "program_type": program_type,
             "age_min_years": age_min_years,
             "age_max_years": months_to_years(max_months),  # None == no upper limit
             "days": text(p.get("Days of The Week")),

@@ -27,6 +27,8 @@
 | `category` | The **activity** — what the child does. Broad, reusable: Hockey, Skating, Swimming, Soccer, Dance, Arts, Martial Arts, STEM, Multi-sport… | `Skating` |
 | `program_type` | The **format**. One of `registered_program`, `drop_in`, `camp`, `after_school` (extensible later: `league`, `membership`). Kept separate from `category` so a hockey camp shows under both **Hockey** and **Camp**. | `camp` |
 
+**Rule:** `category` holds the ACTIVITY only and `program_type` holds the FORMAT only. A format value (e.g. Camp, Drop-in) must never appear in `category`. When a source puts a format into its activity/category field, map the format to `program_type` and set `category` to the real activity, or to a catch-all (Multi-sport / General) when no activity is stated — never the format word.
+
 ### Who it's for
 | field | meaning | example |
 |---|---|---|
@@ -121,3 +123,9 @@ RULES:
 After the JSON array, list: (a) every field you left blank, and (b) anything
 ambiguous you had to make a judgment call on — so I can verify it by hand.
 ```
+
+---
+
+## Known inconsistencies / future work
+
+- City non-camp categories are coarser (e.g. `Sports`) than the finer activity values the camp mapping introduces (e.g. `Soccer`); unify in a later normalization pass if user feedback warrants.

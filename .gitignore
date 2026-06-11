@@ -45,5 +45,3 @@ next-env.d.ts
 __pycache__/
 *.pyc
 
-# generated data
-/public/programs.json
