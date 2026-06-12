@@ -15,9 +15,13 @@
 ### Identity & source
 | field | meaning | example |
 |---|---|---|
-| `id` | Stable unique key. Convention: `source-slug` + provider's own numeric id (from the registration URL if present). Lets you refresh without creating duplicates. | `canlan-78441` |
+| `id` | Stable unique key. Source-native id if one exists (e.g. `toronto-129515`); otherwise a deterministic composite hash computed in code (see rule). Never blank in the final data. | `canlan-a1b2c3d4e5f6` |
 | `source` | Provider/operator name. | `City of Toronto` |
 | `source_type` | One of `city`, `private`, `self_serve`. Drives neutral ranking and, later, tagging of self-enrolled providers. | `private` |
+
+**Rule (`id`):** If the source has a native identifier, use `source-slug` + native id (e.g. `toronto-129515`). Otherwise compute it in code: `source-slug` + `-` + `sha1(lower(source | location_name | course_title | age_min_years | age_max_years | days | start_time | date_range))[:12]`. The hash uses **identity fields only** (note `age_min_years`/`age_max_years` are included because some providers distinguish otherwise-identical offerings by age band, and age is stable identity) and must **exclude** `status`, `price`, `price_value`, `session_count`, and `gender`, so an offering's id stays stable when its availability or price changes week to week. Normalize (trim + lowercase) each input before hashing.
+
+**Rule (`source`):** Each provider has exactly ONE canonical `source` string, set once and never renamed — the `id` hash derives from it, so renaming it silently changes every `id` and breaks week-over-week diffing. The `source-slug` prefix is derived in code (lowercase, non-alphanumerics → hyphens): `Canlan Sports` → `canlan-sports`.
 
 ### What it is
 | field | meaning | example |
@@ -34,6 +38,9 @@
 |---|---|---|
 | `age_min_years` | Minimum age in years; `null` if unstated. | `3` |
 | `age_max_years` | Maximum age in years; `null` if unstated. | `6` |
+| `gender` | Who it's open to: `coed`, `female`, or `male`. Default `coed`; set `female`/`male` **only** when the source explicitly restricts by gender (e.g. "Girls Hockey", "Level Up - Girls"). Never infer gender from the activity. | `coed` |
+
+**Note:** `gender` is the last planned pre-launch facet.
 
 ### When
 | field | meaning | example |
@@ -44,6 +51,7 @@
 | `date_range` | Start–end of the offering. Weekly → the term. Camp → the week. | `Mar 16, 2026–Mar 20, 2026` |
 | `registration_date` | When **registration opens** (the moat datum). Blank if unknown/prose-only. | `2026-08-15` |
 | `status` | Availability **as of capture**: `Open`, `Waitlist`, `Full`, `Closed`, `Started`, or `""`. **Volatile — treat as a snapshot, not live truth.** | `Open` |
+| `session_count` | Number of sessions/meetings stated (e.g. "11 Sessions", "5 Days"). Integer; null if not stated. Extracted from the page. | `11` |
 
 ### Where (the new hierarchy — top to bottom)
 | field | meaning | example |
@@ -59,6 +67,7 @@
 | field | meaning | example |
 |---|---|---|
 | `price` | Free text, to allow bands and per-week pricing. | `$225/week` |
+| `price_value` | Numeric price derived from `price`, for sorting/filtering. A free offering ("$0.00") is `0`, not null. null if no parseable amount. Derived in code. | `341.0` |
 | `activity_url` | Link **out** to the provider's own registration/info page. | `https://…` |
 
 ### Housekeeping

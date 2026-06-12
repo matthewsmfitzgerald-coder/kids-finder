@@ -14,14 +14,15 @@ What it does, in order:
   3. For each program: joins its location, converts ages from MONTHS to years,
      keeps only child-relevant programs, and reshapes it into the v2 schema
      (see SCHEMA.md) -- including the geography hierarchy and source tagging.
-  4. Merges in hand-maintained private/non-city programs from
-     data/private_programs.json (already in v2; passed through unchanged).
+  4. Merges in private/non-city programs from every data/*_offerings.json file
+     (already in v2; passed through unchanged), one file per provider.
   5. Geocodes every location and writes the merged list to public/programs.json.
 
 There is no web framework here and nothing secret -- it's just an HTTP client
 plus some data cleaning.
 """
 
+import hashlib
 import json
 import re
 import sys
@@ -57,8 +58,10 @@ GEOCODE_DELAY_SECONDS = 1.0
 # committed to the repo on purpose -- it's our coordinate lookup table.
 GEOCODE_CACHE_PATH = Path(__file__).parent / "geocode_cache.json"
 
-# Hand-maintained private / non-city programs to merge in.
-PRIVATE_PATH = Path(__file__).parent / "data" / "private_programs.json"
+# Private / non-city programs: one file per provider, matching this glob. Adding
+# a provider later just means dropping a new "<name>_offerings.json" into data/.
+DATA_DIR = Path(__file__).parent / "data"
+PROVIDER_GLOB = "*_offerings.json"
 CITY_SOURCE = "City of Toronto"
 
 # The v2 schema (see SCHEMA.md). Every record carries these fields; the pipeline
@@ -67,14 +70,18 @@ CITY_SOURCE = "City of Toronto"
 PROGRAM_FIELDS_V2 = [
     "id", "source", "source_type",
     "activity_title", "course_title", "category", "program_type",
-    "age_min_years", "age_max_years",
+    "age_min_years", "age_max_years", "gender",
     "days", "start_time", "end_time", "date_range", "registration_date", "status",
+    "session_count",
     "province", "municipality", "sub_area", "location_name", "address", "postal_code",
     "price", "activity_url", "last_updated",
 ]
-# The only numeric fields; everything else is text. Drives the default we fill
-# in for a missing key (null for numbers, "" for text -- the SCHEMA convention).
-NUMBER_FIELDS = {"age_min_years", "age_max_years"}
+# Numeric fields; everything else is text. Drives the default we fill in for a
+# missing key (null for numbers, "" for text -- the SCHEMA convention).
+NUMBER_FIELDS = {"age_min_years", "age_max_years", "session_count"}
+DEFAULT_GENDER = "coed"  # SCHEMA default; set female/male only on explicit restriction
+# price_value is DERIVED from price in code (not passed through), so it is added
+# to every record after merging rather than listed above.
 
 
 # --- Small helpers -----------------------------------------------------------
@@ -230,6 +237,51 @@ def resolve_category(raw_category, activity_title, course_title):
     return recover_activity(activity_title, course_title) or CATCHALL_CATEGORY
 
 
+# --- Stable id, slug, and price_value (see SCHEMA.md rules) -------------------
+
+# Identity fields the id hash is built from -- and ONLY these. age_min/max are
+# included because some providers (e.g. Canlan) distinguish otherwise-identical
+# offerings by age band, and age is stable identity. status, price, price_value,
+# session_count, and gender are deliberately excluded so an id stays stable when
+# availability or price changes week to week.
+ID_HASH_FIELDS = [
+    "source", "location_name", "course_title", "age_min_years", "age_max_years",
+    "days", "start_time", "date_range",
+]
+
+
+def slugify(value):
+    """'Canlan Sports' -> 'canlan-sports': lowercase, non-alphanumerics -> hyphen."""
+    s = (value or "").strip().lower()
+    s = re.sub(r"[^a-z0-9]+", "-", s)
+    return s.strip("-")
+
+
+def composite_id(rec):
+    """Deterministic id for records without a native one: slug + sha1(identity)[:12]."""
+    normalized = "|".join((str(rec.get(f) or "")).strip().lower() for f in ID_HASH_FIELDS)
+    digest = hashlib.sha1(normalized.encode("utf-8")).hexdigest()[:12]
+    return f"{slugify(rec.get('source'))}-{digest}"
+
+
+def parse_price_value(price):
+    """Numeric value from a verbatim price, or None.
+
+    "$341.00" -> 341.0, "$0.00" -> 0.0 (a real zero). A range or multiple amounts
+    ("$200-$300"), blank, or anything with no single clear number -> None. The
+    original `price` text is never modified.
+    """
+    if not price:
+        return None
+    amounts = re.findall(r"\d[\d,]*(?:\.\d+)?", str(price))
+    if len(amounts) != 1:  # zero, or a range/multiple -> ambiguous
+        return None
+    try:
+        return float(amounts[0].replace(",", ""))
+    except ValueError:
+        return None
+
+
 # --- Geocoding ---------------------------------------------------------------
 
 def load_geocode_cache():
@@ -271,8 +323,10 @@ def attach_coordinates(programs):
     cache the result, and copy the coordinates onto every program there.
     """
     # Build "location name -> best address query" for each distinct location.
-    # The query is built from the record's own geography (municipality/province)
-    # rather than a hard-coded "Toronto" -- the data is GTA-wide now.
+    # Lead with the street and postal code (the precise anchors); add the
+    # municipality as the locality and the province. We deliberately do NOT
+    # concatenate sub_area + municipality into one token (e.g. "Etobicoke
+    # Toronto") -- the postal code disambiguates, and a single locality is clean.
     queries = {}
     for p in programs:
         name = p["location_name"]
@@ -281,12 +335,8 @@ def attach_coordinates(programs):
         address = p.get("address") or ""
         if not address:
             continue  # no street address -> can't geocode; leave it off the map
-        bits = [address, p.get("municipality") or "", p.get("province") or ""]
-        query = ", ".join(bit for bit in bits if bit)
-        postal = p.get("postal_code") or ""
-        if postal:
-            query += f" {postal}"
-        queries[name] = f"{query}, Canada"
+        bits = [address, p.get("postal_code") or "", p.get("municipality") or "", p.get("province") or ""]
+        queries[name] = ", ".join(bit for bit in bits if bit) + ", Canada"
 
     cache = load_geocode_cache()
     pending = [(name, q) for name, q in queries.items() if name not in cache]
@@ -315,43 +365,67 @@ def attach_coordinates(programs):
 
 # --- Private (non-city) programs ---------------------------------------------
 
-def load_private_programs():
-    """Read the hand-maintained private programs file, tolerating problems.
-
-    The file is already in the v2 schema, so we PASS VALUES THROUGH UNCHANGED.
-    We only ensure every v2 field is present (filling a missing key with "" for
-    text or None for a number) so a partial record can't crash the app. Missing
-    file, empty file, or invalid JSON all return [] with a friendly message.
-    """
-    if not PRIVATE_PATH.exists():
-        print(f"  No private file at {PRIVATE_PATH} -- skipping.")
-        return []
-
-    raw_text = PRIVATE_PATH.read_text(encoding="utf-8").strip()
+def load_one_provider_file(path):
+    """Load+normalize one provider file, tolerating problems (returns [] on any)."""
+    raw_text = path.read_text(encoding="utf-8").strip()
     if not raw_text:
-        print("  Private file is empty -- skipping.")
+        print(f"  {path.name}: empty -- skipping.")
         return []
-
     try:
         records = json.loads(raw_text)
     except json.JSONDecodeError as err:
-        print(f"  WARNING: private file is not valid JSON ({err}) -- skipping.")
+        print(f"  {path.name}: not valid JSON ({err}) -- skipping.")
         return []
-
     if not isinstance(records, list):
-        print("  WARNING: private file should be a JSON array -- skipping.")
+        print(f"  {path.name}: not a JSON array -- skipping.")
         return []
 
+    # Already v2: PASS VALUES THROUGH UNCHANGED, only ensuring every field exists
+    # (missing text -> "", missing number -> None) so a partial record can't crash.
     normalized = []
     for raw in records:
         rec = {}
         for field in PROGRAM_FIELDS_V2:
             if field in raw:
-                rec[field] = raw[field]  # provided -> pass through untouched
+                rec[field] = raw[field]
             else:
                 rec[field] = None if field in NUMBER_FIELDS else ""
+        if not rec["gender"]:
+            rec["gender"] = DEFAULT_GENDER  # SCHEMA default when unstated
         normalized.append(rec)
+    print(f"  {path.name}: {len(normalized)} records")
     return normalized
+
+
+def load_provider_offerings():
+    """Read EVERY data/*_offerings.json file and merge their records.
+
+    One file per provider. Adding a provider later means dropping a new
+    "<name>_offerings.json" into data/ -- no code change here. Files are read in
+    sorted order so the merged result is deterministic.
+    """
+    paths = sorted(DATA_DIR.glob(PROVIDER_GLOB))
+    if not paths:
+        print(f"  No provider files matching {PROVIDER_GLOB} in {DATA_DIR} -- skipping.")
+        return []
+    print(f"  Found {len(paths)} provider file(s): {', '.join(p.name for p in paths)}")
+    merged = []
+    seen = set()
+    dropped = 0
+    for path in paths:
+        for rec in load_one_provider_file(path):
+            # Drop exact-duplicate rows (identical on every field), which would
+            # otherwise share a computed id. Distinct offerings differ in at
+            # least one field and are kept.
+            signature = json.dumps(rec, sort_keys=True, ensure_ascii=False)
+            if signature in seen:
+                dropped += 1
+                continue
+            seen.add(signature)
+            merged.append(rec)
+    if dropped:
+        print(f"  Dropped {dropped} exact-duplicate record(s).")
+    return merged
 
 
 # --- Data fetching -----------------------------------------------------------
@@ -439,12 +513,14 @@ def main():
             "program_type": program_type,
             "age_min_years": age_min_years,
             "age_max_years": months_to_years(max_months),  # None == no upper limit
+            "gender": DEFAULT_GENDER,  # the City feed doesn't restrict by gender
             "days": text(p.get("Days of The Week")),
             "start_time": format_time(to_int(p.get("Start Hour")), to_int(p.get("Start Min"))) or "",
             "end_time": format_time(to_int(p.get("End Hour")), to_int(p.get("End Min"))) or "",
             "date_range": text(p.get("From To")),
             "registration_date": text(p.get("Registration Date")),
             "status": text(p.get("Status / Information")),
+            "session_count": None,  # not stated in the City feed
             "province": "Ontario",
             "municipality": "Toronto",
             "sub_area": normalize_district(loc.get("District")) or "",
@@ -456,18 +532,37 @@ def main():
             "last_updated": today,
         })
 
-    # Merge in the hand-maintained private (non-city) programs.
-    print("Reading private (non-city) programs...")
-    private = load_private_programs()
-    print(f"  Loaded {len(private)} private programs.")
-
-    # Private records bring their own id; only fill a blank one so the app's
-    # React keys stay unique. We don't otherwise touch private values.
-    for i, rec in enumerate(private, start=1):
-        if not rec.get("id"):
-            rec["id"] = f"private-{i}"
+    # Merge in private (non-city) programs from data/*_offerings.json.
+    print("Reading provider offering files...")
+    private = load_provider_offerings()
+    print(f"  Loaded {len(private)} private programs total.")
 
     combined = output + private
+
+    # Stable ids (SCHEMA.md): keep native ids (city -> toronto-<Course_ID>; any
+    # provider record that ships its own id); otherwise compute a deterministic
+    # composite hash from identity fields only. Replaces the old private-N hack.
+    native_ids = 0
+    hashed_ids = 0
+    for rec in combined:
+        if rec.get("id"):
+            native_ids += 1
+        else:
+            rec["id"] = composite_id(rec)
+            hashed_ids += 1
+
+    # Derive price_value from the verbatim price (the price text is left as-is).
+    for rec in combined:
+        rec["price_value"] = parse_price_value(rec.get("price"))
+
+    # No two records may share an id, or week-over-week diffing breaks.
+    seen = {}
+    for rec in combined:
+        seen[rec["id"]] = seen.get(rec["id"], 0) + 1
+    collisions = {i: n for i, n in seen.items() if n > 1}
+    print(f"  ids: {native_ids} native + {hashed_ids} hashed; "
+          + (f"WARNING {len(collisions)} collision(s): {list(collisions)[:5]}"
+             if collisions else "all unique."))
 
     # Geocode all locations (city + private) so private programs map too.
     print("Adding map coordinates...")

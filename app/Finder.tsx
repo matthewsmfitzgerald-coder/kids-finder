@@ -6,7 +6,7 @@
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import type { Program } from "./types";
-import { ageLabel, programTypeLabel, dayMatches } from "./format";
+import { ageLabel, programTypeLabel, dayMatches, genderLabel } from "./format";
 
 // Day options in calendar order. Our data stores days as "Mon,Wed,Fri", so we
 // match by checking whether the chosen day is one of those tokens.
@@ -64,6 +64,7 @@ export default function Finder() {
   const [age, setAge] = useState(""); // kept as text so the box can be empty
   const [day, setDay] = useState("");
   const [source, setSource] = useState("");
+  const [gender, setGender] = useState("");
 
   // Which view is showing: the card list or the map. Both use the same filters.
   const [view, setView] = useState<"list" | "map">("list");
@@ -92,6 +93,10 @@ export default function Finder() {
   );
   const programTypes = useMemo(
     () => [...new Set(programs.map((p) => p.program_type).filter(Boolean))].sort(),
+    [programs]
+  );
+  const genders = useMemo(
+    () => [...new Set(programs.map((p) => p.gender).filter(Boolean))].sort(),
     [programs]
   );
   // Sorted alphabetically so no provider is presented above another.
@@ -123,6 +128,7 @@ export default function Finder() {
       if (category && p.category !== category) return false;
       if (programType && p.program_type !== programType) return false;
       if (source && p.source !== source) return false;
+      if (gender && p.gender !== gender) return false;
       // Day of week: tolerant of "Mon,Tue", "Saturday", and "Mon–Fri" formats.
       if (day && !dayMatches(p.days, day)) return false;
       // Child's age: keep programs whose age range includes the entered age.
@@ -132,7 +138,7 @@ export default function Finder() {
       }
       return true;
     });
-  }, [orderedPrograms, query, municipality, category, programType, age, day, source]);
+  }, [orderedPrograms, query, municipality, category, programType, age, day, source, gender]);
 
   const shown = filtered.slice(0, RENDER_CAP);
 
@@ -147,7 +153,7 @@ export default function Finder() {
 
   // Any filter set? Drives whether we show the "Clear filters" button.
   const hasActiveFilters = Boolean(
-    query || municipality || category || programType || age || day || source
+    query || municipality || category || programType || age || day || source || gender
   );
 
   // Reset every filter back to its empty state.
@@ -159,6 +165,7 @@ export default function Finder() {
     setAge("");
     setDay("");
     setSource("");
+    setGender("");
   }
 
   // Shared Tailwind classes for the form controls, to avoid repetition.
@@ -232,6 +239,14 @@ export default function Finder() {
           {sources.map((s) => (
             <option key={s} value={s!}>
               {s}
+            </option>
+          ))}
+        </select>
+        <select value={gender} onChange={(e) => setGender(e.target.value)} className={control}>
+          <option value="">All genders</option>
+          {genders.map((g) => (
+            <option key={g} value={g}>
+              {genderLabel(g)}
             </option>
           ))}
         </select>
@@ -311,6 +326,11 @@ export default function Finder() {
                       {programTypeLabel(p.program_type)}
                     </span>
                   )}
+                  {p.gender && p.gender !== "coed" && (
+                    <span className="inline-block rounded-full bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700">
+                      {genderLabel(p.gender)}
+                    </span>
+                  )}
                   <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
                     {p.source}
                   </span>
@@ -332,6 +352,8 @@ export default function Finder() {
                 <span className="text-gray-500">When: </span>
                 {p.days}
                 {p.start_time && ` · ${p.start_time}–${p.end_time}`}
+                {p.session_count != null &&
+                  ` · ${p.session_count} ${p.session_count === 1 ? "session" : "sessions"}`}
               </div>
               {p.date_range && (
                 <div>

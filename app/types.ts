@@ -18,6 +18,7 @@ export type Program = {
   // Who it's for
   age_min_years: number | null;
   age_max_years: number | null;
+  gender: string; // "coed" | "female" | "male"
 
   // When
   days: string; // "Mon,Wed,Fri" (city) or "Saturday" / "Mon–Fri" (v2)
@@ -26,6 +27,7 @@ export type Program = {
   date_range: string;
   registration_date: string;
   status: string;
+  session_count: number | null; // number of sessions/meetings; null if unstated
 
   // Where (province → municipality → sub_area → location)
   province: string;
@@ -37,6 +39,7 @@ export type Program = {
 
   // Cost & link
   price: string; // free text, "" if unknown
+  price_value: number | null; // numeric price for sort/filter; 0 for free; null if unparseable
   activity_url: string;
 
   // Housekeeping

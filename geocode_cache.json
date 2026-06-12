@@ -1051,5 +1051,21 @@
   "Placeholder School (sample)": {
     "lat": 43.6449605,
     "lng": -79.3858597
+  },
+  "Oshawa": {
+    "lat": 43.8546816,
+    "lng": -78.8809418
+  },
+  "Scarborough": {
+    "lat": 43.8297869,
+    "lng": -79.2532673
+  },
+  "Entripy Centre - Oakville": {
+    "lat": 43.4882179,
+    "lng": -79.6501451
+  },
+  "Cwench Centre - Etobicoke": {
+    "lat": 43.7002961,
+    "lng": -79.5750312
   }
 }

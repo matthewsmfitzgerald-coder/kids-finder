@@ -19,9 +19,20 @@ const PROGRAM_TYPE_LABELS: Record<string, string> = {
   drop_in: "Drop-in",
   camp: "Camp",
   after_school: "After-School",
+  clinic: "Clinic",
 };
 export function programTypeLabel(value: string): string {
   return PROGRAM_TYPE_LABELS[value] ?? value;
+}
+
+// gender is stored lowercase ("coed"/"female"/"male"); show it capitalized.
+const GENDER_LABELS: Record<string, string> = {
+  coed: "Coed",
+  female: "Girls",
+  male: "Boys",
+};
+export function genderLabel(value: string): string {
+  return GENDER_LABELS[value] ?? value;
 }
 
 // --- Day-of-week matching ----------------------------------------------------
